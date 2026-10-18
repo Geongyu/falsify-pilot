@@ -26,7 +26,9 @@ def build_preview(protein: pd.DataFrame, rna: pd.DataFrame, crosswalk: pd.DataFr
     rn["rna_canonical_specimen_id"] = rn["canonical_specimen_id"]
     prot = prot[["canonical_specimen_id", "protein_canonical_specimen_id", "protein_local_id", *PREVIEW_COLUMNS["protein"]]]
     rn = rn[["canonical_specimen_id", "rna_canonical_specimen_id", "rna_local_id", *PREVIEW_COLUMNS["rna"]]]
-    paired = prot.merge(rn, on="canonical_specimen_id", validate="one_to_one")
+    rn = rn.sample(frac=1, random_state=1729).reset_index(drop=True)
+    paired = pd.concat([prot.reset_index(drop=True),
+                        rn.drop(columns=["canonical_specimen_id"]).reset_index(drop=True)], axis=1)
     paired = paired.sort_values("canonical_specimen_id").head(n_rows).reset_index(drop=True)
     return paired.drop(columns=["canonical_specimen_id"])
 
