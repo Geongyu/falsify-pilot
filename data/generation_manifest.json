@@ -89,12 +89,16 @@
     "modality_crosswalk.csv": "91d998c9102306b18097f4a20ef582d4c18eeb1a3d650139e2d67e9f4d5c9d40",
     "protein.csv": "2bbf524fc7d1cecac9fa5f6ab60cd9642a84976309060bee697b88b1f0f9b86b",
     "rna.csv": "179239ee1f6fd16fddb8633811535f0d3c798739bb040dd0c54bf9d3f89d28ae",
-    "labels.csv": "ee2426f1b298006fbb948ae499b63e8dd3b099a8c92d08d95c76de1a70f1c882",
-    "feature_dictionary.json": "434e73865a362662f1766450f085a41c04313c39693fa7c3050a310f633161b5"
+    "labels.csv": "748c4dd1ee85500ffcdf37819d09eb2d63788a9d86346e86fa6ebd3eecbb4281",
+    "observation_mask.csv": "6c92171d728ad8114320ff786f863eefb7c0021422c79cbfb02d7edb499f3acf",
+    "feature_dictionary.json": "434e73865a362662f1766450f085a41c04313c39693fa7c3050a310f633161b5",
+    "label_dictionary.json": "fb0dea6f2d6322cc231cd0938b3323ead2e3d01e4e7ca4e03cfa7f460fa87af2",
+    "label_provenance.json": "65d5da0c563b5bee020d528ac0e9201c19f2e4f3bf443ca75553759aa9708a4f"
   },
   "producer": {
     "source_sha256": {
-      "src/generate.py": "f4e606fc22c9375e5873d5ba8a28a37c754813427fc88fb92933206c6d9f9526",
+      "src/generate.py": "3fbeefd95f939898679f5a821cd1ecaedbe0657ab35076bc715ae91dbb9914ef",
+      "src/labels.py": "13b3b5deea73b2a7b6aaa56ff164b4530e3e0ca5b0c93a9adc262e9513b425af",
       "src/schema.py": "bf2a82db24b75ed4e7274ba9864f026a7d120a5a750f70edc5a4026509204458",
       "src/io_utils.py": "e03b19012f254fd973bbd9a80011ca5a15fbf0102b8c3e8be060c38a7b78b68a"
     },

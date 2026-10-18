@@ -6,8 +6,7 @@ blood was drawn, no assay was run and no person is represented.
 Structure: each subject has a latent state shared by its two aliquots taken at
 the same index visit (day 0). Protein and RNA features are noisy functions of
 that state plus a site batch offset and aliquot-level technical noise. Six
-synthetic outcomes depend on the latent state and the site; event and follow-up
-days are recorded per (subject, task) in labels.csv. One RNA-file
+synthetic outcomes depend on the latent state and the site. One RNA-file
 column, ``followup_peak_synthetic``, is a day-30 follow-up measurement that
 tracks the outcomes; the feature dictionary marks it as post-index.
 
@@ -24,6 +23,7 @@ import pandas as pd
 
 from src import schema
 from src.io_utils import sha256_file, write_csv, write_json
+from src.labels import build_labels, observation_mask
 
 GENERATOR_VERSION = "1.0"
 SEED = 1729
@@ -125,7 +125,7 @@ def generate_cohort(seed: int = SEED) -> dict:
             event_rows.append((sid, task, int(true_day[i, t]) if seen[i, t] else None, int(followup_end[i])))
     events = pd.DataFrame(event_rows, columns=["subject_id", "task_id", "event_day", "followup_end_day"])
     events["event_day"] = events["event_day"].astype("Int64")
-    labels = events
+    labels = build_labels(events)
 
     # specimens: two aliquots per subject from the same index visit
     specimen_rows = []
@@ -236,6 +236,47 @@ def feature_dictionary() -> dict:
     }
 
 
+def label_dictionary() -> dict:
+    return {
+        "schema_version": "1.0",
+        "horizon_days": schema.HORIZON_DAYS,
+        "index_day": 0,
+        "tasks": [
+            {"task_id": t, "description": f"Synthetic binary outcome {t} within 180 days after the index visit. "
+                                          "Abstract simulated event; not a disease or clinical diagnosis."}
+            for t in schema.TASK_IDS
+        ],
+        "values": {"y": "1 = event observed in (0, 180]; 0 = no event in (0, 180] and follow-up reached day 180 "
+                        "(events recorded after day 180 do not count); null = follow-up ended before day 180 "
+                        "without an event (not observed)",
+                   "observed": "false exactly when y is null"},
+    }
+
+
+def label_provenance(labels: pd.DataFrame) -> dict:
+    per_task = {}
+    for task, grp in labels.groupby("task_id"):
+        per_task[task] = {
+            "n_subjects": int(len(grp)),
+            "n_observed": int(grp["observed"].sum()),
+            "n_unobserved": int((~grp["observed"]).sum()),
+            "n_positive": int((grp["y"] == 1).sum()),
+            "n_negative": int((grp["y"] == 0).sum()),
+        }
+    return {
+        "schema_version": "1.0",
+        "builder": "src/labels.py::build_labels",
+        "horizon_days": schema.HORIZON_DAYS,
+        "inputs": ["event_day", "followup_end_day"],
+        "rules": [
+            "observed event with 0 < event_day <= 180 -> y=1, observed=true",
+            "otherwise followup_end_day >= 180 -> y=0, observed=true",
+            "otherwise -> y=null, observed=false (right-censored before day 180)",
+        ],
+        "per_task": per_task,
+    }
+
+
 def write_cohort(out_dir, seed: int = SEED) -> dict:
     out_dir = Path(out_dir)
     tables = generate_cohort(seed)
@@ -245,10 +286,14 @@ def write_cohort(out_dir, seed: int = SEED) -> dict:
     write_csv(tables["protein"], out_dir / "protein.csv")
     write_csv(tables["rna"], out_dir / "rna.csv")
     write_csv(tables["labels"], out_dir / "labels.csv")
+    write_csv(observation_mask(tables["labels"]), out_dir / "observation_mask.csv")
     write_json(feature_dictionary(), out_dir / "feature_dictionary.json")
+    write_json(label_dictionary(), out_dir / "label_dictionary.json")
+    write_json(label_provenance(tables["labels"]), out_dir / "label_provenance.json")
 
     outputs = ["subjects.csv", "specimens.csv", "modality_crosswalk.csv", "protein.csv", "rna.csv",
-               "labels.csv", "feature_dictionary.json"]
+               "labels.csv", "observation_mask.csv", "feature_dictionary.json",
+               "label_dictionary.json", "label_provenance.json"]
     manifest = {
         "schema_version": "1.0",
         "generator": "src/generate.py",
