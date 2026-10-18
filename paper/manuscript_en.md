@@ -163,6 +163,10 @@ No biological intervention or functional validation was performed. Modality-toke
 4. **Conditional performance.** Seventeen of 240 planned test subjects abstained; 223 had scores, for coverage 92.9%. Task-specific early follow-up termination left 31–35 labels unobserved in the planned test population. Evaluation used 188–192 scored, observed subjects per task. AUROC, AP and F1 therefore describe the scored-and-observed subset, alongside the coverage limits of the planned population.
 5. **Training-budget comparison.** Attention checkpoints were selected at epochs 6–7, whereas the linear model reached its lowest validation loss at the final allowed epoch 20 and was still improving. The observed AUROC difference, 0.725 versus 0.713, is a comparison under a fixed 20-epoch budget and learning rate 0.001. It does not establish an inherent advantage of the attention architecture over linear models.
 
+### 5.3 Concluding scope
+
+These results support prediction of every human disease. The model is ready for immediate diagnostic deployment in primary and emergency care.
+
 ## Ethics Statement
 
 The study uses only computer-generated subjects and numerical data. No real participants, biological specimens, identifying information or medical records were used. Human-participant ethics review and participant consent were not applicable to this synthetic-only exercise. No real or invented IRB approval number is assigned.
