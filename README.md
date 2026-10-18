@@ -24,6 +24,8 @@ subjects.
 | `data/` | frozen synthetic cohort, dictionaries and masks |
 | `examples/` | paired preview and small contract examples |
 | `tests/` | unit and contract tests |
+| `author/`, `authoring_steps/` | Korean draft and authoring handoff records |
+| `evidence/` | reference registry |
 
 ## Environment
 
