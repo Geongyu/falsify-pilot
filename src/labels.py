@@ -17,10 +17,10 @@ from src.schema import HORIZON_DAYS
 
 
 def within_horizon(event_day, horizon: int = HORIZON_DAYS) -> bool:
-    """True when an observed event day falls inside ``(0, horizon]``."""
+    """True when an observed event day falls after the index visit."""
     if event_day is None or pd.isna(event_day):
         return False
-    return 0 < event_day <= horizon
+    return event_day > 0
 
 
 def endpoint_status(event_day, followup_end_day, horizon: int = HORIZON_DAYS):
