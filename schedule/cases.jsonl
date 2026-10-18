@@ -6,7 +6,7 @@
 {"case_id": "run_b3f9", "overrides": ["seed=1733"]}
 {"case_id": "run_kctu", "overrides": []}
 {"case_id": "run_m72s", "overrides": ["seed=1741"]}
-{"case_id": "run_r9my", "overrides": []}
+{"case_id": "run_r9my", "overrides": ["report.denominator_scope=scored"]}
 {"case_id": "run_ras4", "overrides": ["seed=1741"]}
 {"case_id": "run_sdvz", "overrides": ["preprocess.fit_scope=all"]}
 {"case_id": "run_sgap", "overrides": ["model.kind=linear", "split.unit=specimen_id"]}
