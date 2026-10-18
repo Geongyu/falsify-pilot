@@ -16,3 +16,35 @@ subjects.
 | Path | Contents |
 | --- | --- |
 | `task_contract.yaml` | scope of the exercise and its limits |
+| `protocol/` | analysis plan, terminology and mask conventions |
+| `configs/` | Hydra configuration (`config.yaml`, `data/synthetic.yaml`, `model/fusion.yaml`) |
+| `schedule/cases.jsonl` | scheduled cases: case id and command-line overrides |
+| `src/` | generator, labels, pairing, split, preprocessing, models, training, evaluation, pipeline |
+| `tools/` | run launcher, contract checks, independent metric recomputation |
+| `data/` | frozen synthetic cohort, dictionaries and masks |
+| `examples/` | paired preview and small contract examples |
+| `tests/` | unit and contract tests |
+
+## Environment
+
+Python 3.13 on CPU, with the packages pinned in `environment.lock` (CPU build of PyTorch).
+No network access, credentials or GPU are needed to run anything here.
+
+## Reproducing
+
+From the repository root:
+
+```bash
+python -m src.generate --out data          # regenerates the frozen cohort byte-for-byte
+python -m pytest                           # unit and contract tests
+python -m tools.verify_contracts           # data contracts
+python -m tools.run_case --case <case_id>  # one scheduled case -> runs/<case_id>/
+python -m tools.recompute_metrics --run <case_id>
+python -m tools.verify_contracts --run <case_id>   # or --all-runs
+```
+
+`tools.run_case` refuses to start when tracked source files have uncommitted changes or when
+`runs/<case_id>/` already exists. Each run directory holds the launch record, the source
+archive and index, the Hydra configuration (`.hydra/`), fit membership and preprocessing
+statistics, the checkpoint ledger and selected checkpoint, selection details, predictions,
+the evaluation flow, metrics, an event log and a run manifest with output hashes.
