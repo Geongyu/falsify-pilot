@@ -92,14 +92,20 @@ def aggregate_auc(task_data: dict) -> float:
 
 
 def bootstrap_ids(frame: pd.DataFrame, n_boot: int, seed: int, unit: str = "subject_id"):
-    """Resample rows with replacement; return row positions per replicate.
+    """Resample ``unit`` values with replacement; return row positions per replicate.
 
-    Also returns the ``unit`` value of every sampled row.
+    Each replicate holds every row of each sampled unit (a unit drawn twice
+    contributes its rows twice), plus the sampled unit ids.
     """
+    units = np.array(sorted(frame[unit].unique()))
     rng = np.random.default_rng(seed)
-    draws = rng.integers(0, len(frame), size=(n_boot, len(frame)))
-    values = frame[unit].to_numpy()
-    return [(row, values[row]) for row in draws]
+    draws = rng.integers(0, len(units), size=(n_boot, len(units)))
+    positions = {u: np.flatnonzero(frame[unit].to_numpy() == u) for u in units}
+    replicates = []
+    for row in draws:
+        sampled = units[row]
+        replicates.append((np.concatenate([positions[u] for u in sampled]), sampled))
+    return replicates
 
 
 def evaluate_subjects(table: pd.DataFrame, thresholds: dict, n_boot: int, seed: int, ci_level: float) -> dict:

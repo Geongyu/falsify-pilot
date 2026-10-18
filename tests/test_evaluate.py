@@ -30,6 +30,15 @@ def test_macro_is_unweighted_mean_of_task_auroc():
     assert np.isclose(aggregate_auc(task_data), (0.75 + 1.0) / 2)
 
 
+def test_bootstrap_keeps_aliquots_of_a_subject_together():
+    frame = pd.DataFrame({"subject_id": ["s1", "s1", "s2", "s2", "s3", "s3"],
+                          "specimen_id": ["s1a", "s1b", "s2a", "s2b", "s3a", "s3b"]})
+    for rows, sampled in bootstrap_ids(frame, 20, 5):
+        picked = frame.iloc[rows]
+        assert len(picked) == 2 * len(sampled)
+        assert (picked.groupby("subject_id").size() % 2 == 0).all()
+
+
 def test_bootstrap_is_reproducible():
     frame = pd.DataFrame({"subject_id": ["s1", "s2", "s3", "s4"]})
     a = [tuple(rows) for rows, _ in bootstrap_ids(frame, 10, 11)]
