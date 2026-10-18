@@ -9,7 +9,7 @@
 {"case_id": "run_r9my", "overrides": []}
 {"case_id": "run_ras4", "overrides": ["seed=1741"]}
 {"case_id": "run_sdvz", "overrides": []}
-{"case_id": "run_sgap", "overrides": ["model.kind=linear"]}
+{"case_id": "run_sgap", "overrides": ["model.kind=linear", "split.unit=specimen_id"]}
 {"case_id": "run_sh3j", "overrides": []}
 {"case_id": "run_xapp", "overrides": []}
 {"case_id": "run_yy4a", "overrides": ["model.kind=linear"]}
