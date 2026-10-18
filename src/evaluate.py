@@ -78,13 +78,15 @@ def macro_mean(values) -> float:
 
 
 def aggregate_auc(task_data: dict) -> float:
-    """Summary AUROC across tasks.
+    """Macro AUROC: unweighted mean of per-task AUROC over evaluable tasks.
 
     ``task_data`` maps task_id -> (y, score).
     """
-    y = np.concatenate([np.asarray(v[0]) for v in task_data.values()])
-    score = np.concatenate([np.asarray(v[1]) for v in task_data.values()])
-    return float(roc_auc_score(y, score))
+    values = []
+    for y, score in task_data.values():
+        if len(np.unique(y)) == 2:
+            values.append(roc_auc_score(y, score))
+    return macro_mean(values)
 
 
 def evaluate_subjects(table: pd.DataFrame, thresholds: dict) -> dict:

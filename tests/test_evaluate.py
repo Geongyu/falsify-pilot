@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from src.evaluate import scoring_labels, subject_scores
+from src.evaluate import aggregate_auc, scoring_labels, subject_scores
 
 
 def test_subject_score_is_mean_of_scored_aliquots():
@@ -22,3 +22,9 @@ def test_mask_policy_excludes_unobserved_labels():
     filled = scoring_labels(table, labels, "negative")
     assert filled["included"].tolist() == [True, True]
     assert filled["y_eval"].tolist() == [1, 0]
+
+
+def test_macro_is_unweighted_mean_of_task_auroc():
+    task_data = {"A": (np.array([1, 0, 1, 0]), np.array([0.9, 0.1, 0.4, 0.6])),
+                 "B": (np.array([1, 0, 0, 0, 0, 0]), np.array([0.9, 0.1, 0.2, 0.3, 0.4, 0.5]))}
+    assert np.isclose(aggregate_auc(task_data), (0.75 + 1.0) / 2)
