@@ -86,9 +86,16 @@ def train_model(model, train_data, val_data, max_epochs: int, learning_rate: flo
     return ledger, states
 
 
-def select_candidate(ledger: pd.DataFrame, key: str = "test_auroc") -> pd.Series:
-    """Pick the candidate (epoch, and seed if present) with the best summary score."""
-    order = ledger.sort_values(key, ascending=False, kind="mergesort")
+def select_candidate(ledger: pd.DataFrame, key: str = "val_loss") -> pd.Series:
+    """Pick the candidate (epoch, and seed if present) with the lowest validation loss.
+
+    Columns describing the test split are dropped before selection so that
+    they cannot influence the choice; the full ledger is kept by the caller.
+    """
+    usable = ledger[[c for c in ledger.columns if not c.startswith("test_")]]
+    if key not in usable.columns:
+        raise ValueError(f"selection key {key!r} is not a validation quantity")
+    order = usable.sort_values([key] + [c for c in ("seed", "epoch") if c in usable.columns], kind="mergesort")
     return ledger.loc[order.index[0]]
 
 

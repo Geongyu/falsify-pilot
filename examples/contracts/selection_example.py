@@ -1,7 +1,8 @@
 """Candidate-selection example over a small epoch x seed ledger.
 
 ``selection_ledger.csv`` holds illustrative fixture numbers (not model
-results).
+results). The selection must use the validation loss only; test columns are
+kept in the ledger for reporting and are not inputs to the choice.
 
 Usage: ``python -m examples.contracts.selection_example``
 """
@@ -18,11 +19,10 @@ HERE = Path(__file__).parent
 
 def build() -> dict:
     ledger = pd.read_csv(HERE / "selection_ledger.csv")
-    best = select_candidate(ledger, key="test_auroc")
+    best = select_candidate(ledger, key="val_loss")
     return {
-        "selection_key": "test_auroc",
-        "selected": {"seed": int(best["seed"]), "epoch": int(best["epoch"]), "val_loss": float(best["val_loss"]),
-                     "test_auroc": float(best["test_auroc"])},
+        "selection_key": "val_loss",
+        "selected": {"seed": int(best["seed"]), "epoch": int(best["epoch"]), "val_loss": float(best["val_loss"])},
         "n_candidates": int(len(ledger)),
         "ledger_columns": list(ledger.columns),
     }
