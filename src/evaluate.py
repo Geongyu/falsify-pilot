@@ -1,4 +1,4 @@
-"""Subject-level evaluation: per-task AUROC/AP/F1 and macro averages.
+"""Subject-level evaluation: per-task AUROC/AP/F1, macro averages, subject bootstrap.
 
 * Specimen scores are averaged within each subject (only aliquots that belong
   to the evaluated split and were scored). A subject with no scored aliquot
@@ -6,6 +6,8 @@
 * ``scoring_labels`` decides which subject labels enter evaluation.
 * Task metrics use continuous scores for AUROC and AP and the fixed threshold
   for F1. Macro averages are unweighted means over evaluable tasks.
+* Confidence intervals resample subjects with replacement; every row of a
+  sampled subject comes along.
 """
 
 import numpy as np
@@ -89,26 +91,97 @@ def aggregate_auc(task_data: dict) -> float:
     return macro_mean(values)
 
 
-def evaluate_subjects(table: pd.DataFrame, thresholds: dict) -> dict:
-    """Point estimates per task and macro averages.
+def bootstrap_ids(frame: pd.DataFrame, n_boot: int, seed: int, unit: str = "subject_id"):
+    """Resample ``unit`` values with replacement; return row positions per replicate.
+
+    Each replicate holds every row of each sampled unit (a unit drawn twice
+    contributes its rows twice), plus the sampled unit ids.
+    """
+    units = np.array(sorted(frame[unit].unique()))
+    rng = np.random.default_rng(seed)
+    draws = rng.integers(0, len(units), size=(n_boot, len(units)))
+    positions = {u: np.flatnonzero(frame[unit].to_numpy() == u) for u in units}
+    replicates = []
+    for row in draws:
+        sampled = units[row]
+        replicates.append((np.concatenate([positions[u] for u in sampled]), sampled))
+    return replicates
+
+
+def evaluate_subjects(table: pd.DataFrame, thresholds: dict, n_boot: int, seed: int, ci_level: float) -> dict:
+    """Point estimates and subject-bootstrap percentile intervals.
 
     ``table`` is the output of :func:`scoring_labels` for the evaluation split.
     """
     tasks = sorted(table["task_id"].unique())
-    task_out, task_data = {}, {}
-    for task in tasks:
-        grp = table[(table["task_id"] == task) & table["included"]]
-        y = grp["y_eval"].astype(int).to_numpy()
-        task_data[task] = (y, grp["score"].to_numpy(dtype=float))
-        entry = task_metrics(y, grp["score"].to_numpy(dtype=float), thresholds[task])
+    wide_score = table.pivot(index="subject_id", columns="task_id", values="score")
+    wide_y = table.pivot(index="subject_id", columns="task_id", values="y_eval")
+    wide_inc = table.pivot(index="subject_id", columns="task_id", values="included").astype(bool)
+    status = table.groupby("subject_id")["score_status"].first()
+    pool = status[status == "scored"].index
+    S = wide_score.loc[pool, tasks].to_numpy(dtype=float)
+    Y = wide_y.loc[pool, tasks].astype("Float64").to_numpy(dtype=float, na_value=np.nan)
+    INC = wide_inc.loc[pool, tasks].to_numpy()
+
+    def compute(rows):
+        per_task, task_data = {}, {}
+        for j, task in enumerate(tasks):
+            sel = rows[INC[rows, j]]
+            per_task[task] = task_metrics(Y[sel, j], S[sel, j], thresholds[task])
+            task_data[task] = (Y[sel, j].astype(int), S[sel, j])
+        macro = {"auroc": aggregate_auc(task_data)}
+        macro.update({m: macro_mean([per_task[t][m] for t in tasks]) for m in ("ap", "f1")})
+        return per_task, macro
+
+    point_tasks, point_macro = compute(np.arange(len(pool)))
+    frame = pd.DataFrame({"subject_id": np.array(pool)})
+    reps = bootstrap_ids(frame, n_boot, seed)
+    boot = {m: {t: [] for t in tasks} for m in ("auroc", "ap", "f1")}
+    boot_macro = {m: [] for m in ("auroc", "ap", "f1")}
+    for rows, _ in reps:
+        per_task, macro = compute(rows)
+        for m in ("auroc", "ap", "f1"):
+            for t in tasks:
+                v = per_task[t][m]
+                boot[m][t].append(np.nan if v is None else v)
+            boot_macro[m].append(macro[m])
+    lo_q, hi_q = 100 * (1 - ci_level) / 2, 100 * (1 + ci_level) / 2
+
+    def interval(samples):
+        arr = np.asarray(samples, dtype=float)
+        arr = arr[~np.isnan(arr)]
+        if len(arr) == 0:
+            return None, 0
+        return [float(np.percentile(arr, lo_q)), float(np.percentile(arr, hi_q))], int(len(arr))
+
+    task_out = {}
+    for j, task in enumerate(tasks):
+        inc = INC[:, j]
+        y = Y[inc, j]
+        entry = dict(point_tasks[task])
         entry.update({
             "threshold": thresholds[task],
-            "n_eval": int(len(grp)),
+            "n_eval": int(inc.sum()),
             "n_positive": int(np.sum(y == 1)),
-            "prevalence": float(np.mean(y == 1)) if len(grp) else None,
+            "prevalence": float(np.mean(y == 1)) if inc.sum() else None,
         })
+        entry["ci"] = {}
+        for m in ("auroc", "ap", "f1"):
+            ci, n_valid = interval(boot[m][task])
+            entry["ci"][m] = ci
+            entry["ci"][f"{m}_n_valid"] = n_valid
         task_out[task] = entry
-    macro_out = {"auroc": aggregate_auc(task_data)}
-    macro_out.update({m: macro_mean([task_out[t][m] for t in tasks]) for m in ("ap", "f1")})
-    macro_out["n_tasks"] = int(sum(task_out[t]["auroc"] is not None for t in tasks))
-    return {"tasks": task_out, "macro": macro_out}
+    macro_out = dict(point_macro)
+    macro_out["n_tasks"] = int(sum(point_tasks[t]["auroc"] is not None for t in tasks))
+    macro_out["ci"] = {}
+    for m in ("auroc", "ap", "f1"):
+        ci, n_valid = interval(boot_macro[m])
+        macro_out["ci"][m] = ci
+        macro_out["ci"][f"{m}_n_valid"] = n_valid
+    return {
+        "tasks": task_out,
+        "macro": macro_out,
+        "bootstrap": {"unit": "subject_id", "pool": "scored subjects of the evaluation split",
+                      "n_pool": int(len(pool)), "n_boot": int(n_boot), "seed": int(seed),
+                      "ci_level": ci_level, "percentile_method": "numpy.percentile (linear)"},
+    }

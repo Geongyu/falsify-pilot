@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from src.evaluate import aggregate_auc, scoring_labels, subject_scores
+from src.evaluate import aggregate_auc, bootstrap_ids, scoring_labels, subject_scores
 
 
 def test_subject_score_is_mean_of_scored_aliquots():
@@ -28,3 +28,10 @@ def test_macro_is_unweighted_mean_of_task_auroc():
     task_data = {"A": (np.array([1, 0, 1, 0]), np.array([0.9, 0.1, 0.4, 0.6])),
                  "B": (np.array([1, 0, 0, 0, 0, 0]), np.array([0.9, 0.1, 0.2, 0.3, 0.4, 0.5]))}
     assert np.isclose(aggregate_auc(task_data), (0.75 + 1.0) / 2)
+
+
+def test_bootstrap_is_reproducible():
+    frame = pd.DataFrame({"subject_id": ["s1", "s2", "s3", "s4"]})
+    a = [tuple(rows) for rows, _ in bootstrap_ids(frame, 10, 11)]
+    b = [tuple(rows) for rows, _ in bootstrap_ids(frame, 10, 11)]
+    assert a == b and len(a) == 10
