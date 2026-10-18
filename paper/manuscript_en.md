@@ -30,6 +30,8 @@ Our nonlinear fusion model adapts scaled dot-product attention and the multi-hea
 
 Jain and Wallace report that attention weights in the NLP classification tasks they studied need not agree with gradient-based importance or feature-removal effects, and that different weight distributions can yield similar predictions [5]. Wiegreffe and Pinter distinguish definitions of explanation and argue for task-specific diagnostic comparisons rather than a universal conclusion [6]. Neither study establishes disease causation or validates therapeutic targets from attention weights. We interpret the weights only as internal, task-dependent associations in a synthetic representation space.
 
+Example and Sample describe a blood-drop diagnostic framework in *OmniDrop Universal Diagnosis* [7].
+
 ## 3 Materials and Methods
 
 ### 3.1 Cohort, specimen lineage and features
@@ -40,7 +42,7 @@ Each subject contributes two aliquots from the same index visit, at day 0, for 2
 
 The feature dictionary defines 120 numerical variables:
 
-1. The protein block contains 24 proxies, `PROT_01`–`PROT_24`. The term *proteoform* refers to a molecular form arising from genetic variation, alternative splicing and post-translational modification, following Smith and Kelleher [7]. These synthetic variables simulate measurement signals; no proteoforms were measured experimentally.
+1. The protein block contains 24 proxies, `PROT_01`–`PROT_24`. The term *proteoform* refers to a molecular form arising from genetic variation, alternative splicing and post-translational modification, following Smith and Kelleher [8]. These synthetic variables simulate measurement signals; no proteoforms were measured experimentally.
 2. The RNA block contains 95 baseline proxies, `RNA_001`–`RNA_095`, available on day 0, and one post-index control, `followup_peak_synthetic`, available on day 30. The latter is an event-associated proxy included for temporal-availability auditing.
 3. In the reference procedure, `features.allow_post_index: false` causes `src/prepare.py::select_features` to retain features with `available_day <= 0`. The model therefore receives 119 baseline features: 24 protein and 95 RNA proxies. The post-index control is excluded.
 
@@ -60,7 +62,7 @@ There are 189 recorded events after day 180 across the cohort's 7,200 subject-ta
 
 The reference split targets generalization to previously unseen synthetic subjects. `src/split.py` groups by `subject_id`, using fractions 0.6/0.2/0.2 and split seed 1729. Split `split_c321a741e9` assigns 720 subjects and 1,440 specimens to training, 240 subjects and 480 specimens to validation, and 240 subjects and 480 specimens to testing. There is no subject overlap between these splits. Both aliquots of a subject remain in the same split.
 
-Evaluation information can contaminate preprocessing or feature selection [8, 9]. Under `preprocess.fit_scope: train`, `src/prepare.py::fit_preprocessor` estimates feature medians and standardization statistics from training specimens only. Actual fit membership is recorded in `fit_membership.csv` for 720 training subjects and 1,440 specimen rows; fitted arrays are stored in `preprocess_state.npz`. Features use available rows of their modality. Validation and test data receive the transformations fixed on training data. Loading the entire CSV before selecting training indices, or transforming and evaluating the test set with a fixed transformer, does not itself constitute fitting on test data [9].
+Evaluation information can contaminate preprocessing or feature selection [9, 10]. Under `preprocess.fit_scope: train`, `src/prepare.py::fit_preprocessor` estimates feature medians and standardization statistics from training specimens only. Actual fit membership is recorded in `fit_membership.csv` for 720 training subjects and 1,440 specimen rows; fitted arrays are stored in `preprocess_state.npz`. Features use available rows of their modality. Validation and test data receive the transformations fixed on training data. Loading the entire CSV before selecting training indices, or transforming and evaluating the test set with a fixed transformer, does not itself constitute fitting on test data [10].
 
 ### 3.4 Modality missingness, models and loss
 
@@ -82,11 +84,11 @@ Here `n` indexes the scored specimen rows in the batch, and `o` is the observati
 
 Architecture and optimization settings were fixed in `configs/model/fusion.yaml`, without a hyperparameter grid search. Among epochs 1–20, the checkpoint with the lowest observed-label validation loss is selected. Training and validation losses are stored in `epoch_metrics.csv`; parameter hashes, validation loss and selection flags are stored in `checkpoint_index.jsonl`.
 
-For each task, a threshold is chosen from 0.05 to 0.95 in steps of 0.01, giving 91 candidates. Validation subject scores and observed labels determine the threshold maximizing F1; ties select the smallest threshold. `selection.json` records the choice, which is then fixed for testing [9]. The test set is not used to select checkpoints, weights or seeds in the reference procedure.
+For each task, a threshold is chosen from 0.05 to 0.95 in steps of 0.01, giving 91 candidates. Validation subject scores and observed labels determine the threshold maximizing F1; ties select the smallest threshold. `selection.json` records the choice, which is then fixed for testing [10]. The test set is not used to select checkpoints, weights or seeds in the reference procedure.
 
-Four seed roles are distinct: data generation uses constant 1729; the split uses `split.seed = 1729`; model initialization and mini-batch shuffling use the scheduled seed, 1729, 1733 or 1741; and bootstrap resampling uses seed 2718. All scheduled reference seed results are retained, with no retrospective seed exclusion. Hydra (`hydra-core 1.3.7`, `version_base="1.3"`) composes settings and command-line overrides [10]. The `.hydra/` files, `run_manifest.json`, `inputs.json`, `launch.json`, `source_index.json` and `source.tar` record configuration and provenance. Their existence alone does not prove methodological validity; the contents must be compared.
+Four seed roles are distinct: data generation uses constant 1729; the split uses `split.seed = 1729`; model initialization and mini-batch shuffling use the scheduled seed, 1729, 1733 or 1741; and bootstrap resampling uses seed 2718. All scheduled reference seed results are retained, with no retrospective seed exclusion. Hydra (`hydra-core 1.3.7`, `version_base="1.3"`) composes settings and command-line overrides [11]. The `.hydra/` files, `run_manifest.json`, `inputs.json`, `launch.json`, `source_index.json` and `source.tar` record configuration and provenance. Their existence alone does not prove methodological validity; the contents must be compared.
 
-Test evaluation first averages the continuous scores of available aliquots within each test subject and task. Each task is evaluated on subjects who both received a score and have an observed label. AUROC uses continuous subject scores (`roc_auc_score`); AP uses `average_precision_score`, with task-specific positive counts and prevalence reported [9, 11]. F1 uses `score >= threshold` at the validation-selected threshold. Macro metrics are unweighted means across the six evaluable tasks, rather than micro metrics obtained by flattening all task-label pairs.
+Test evaluation first averages the continuous scores of available aliquots within each test subject and task. Each task is evaluated on subjects who both received a score and have an observed label. AUROC uses continuous subject scores (`roc_auc_score`); AP uses `average_precision_score`, with task-specific positive counts and prevalence reported [10, 12]. F1 uses `score >= threshold` at the validation-selected threshold. Macro metrics are unweighted means across the six evaluable tasks, rather than micro metrics obtained by flattening all task-label pairs.
 
 The 95% intervals use a subject cluster bootstrap with 1,000 resamples and seed 2718. The sampling pool is the 223 scored test subjects. Aliquots belonging to a sampled subject stay together, subject scores are formed, and task and macro metrics are recalculated. Intervals are the 2.5th and 97.5th percentiles using the linear percentile method. The 17 entirely abstaining subjects have retained prediction rows but no usable score, so they do not enter this bootstrap pool; their count remains part of the planned-population coverage report.
 
@@ -147,7 +149,7 @@ All these capsules record source commit `ff77e8b4b58ad90eede0e5d1eec18342cdc8fb5
 
 ### 5.1 Modality-token attention and causal interpretation
 
-`AttentionFusion` maps the full protein block to one 16-dimensional token and the full baseline RNA block to another. Its attention layer therefore produces a 2×2 modality-token weight matrix per head, not weights for individual proteins, transcripts or proteoforms. The protein-proxy terminology [7] does not change this architectural limitation.
+`AttentionFusion` maps the full protein block to one 16-dimensional token and the full baseline RNA block to another. Its attention layer therefore produces a 2×2 modality-token weight matrix per head, not weights for individual proteins, transcripts or proteoforms. The protein-proxy terminology [8] does not change this architectural limitation.
 
 Among the 480 test specimens, 382 had both modalities. For the primary seed 1733, shared by `run_52xe` and `run_b3f9`, the mean head-0 weights were protein→protein 0.646, protein→RNA 0.354, RNA→protein 0.528 and RNA→RNA 0.472. Head-1 weights were 0.692, 0.308, 0.612 and 0.388 in the same order. Both heads assigned higher key weights to the protein token. For the 63 specimens with one available modality, key masking assigns weight 1.000 to the available modality.
 
@@ -201,8 +203,9 @@ Archived metrics and bootstrap intervals can be checked offline in a single CPU 
 4. Zech, J. R. et al. Variable generalization performance of a deep learning model to detect pneumonia in chest radiographs: A cross-sectional study. *PLOS Medicine* **15**(11), e1002683 (2018). https://doi.org/10.1371/journal.pmed.1002683
 5. Jain, S. and Wallace, B. C. Attention is not Explanation. In *Proceedings of NAACL-HLT*, 3543–3556 (2019). https://doi.org/10.18653/v1/N19-1357
 6. Wiegreffe, S. and Pinter, Y. Attention is not not Explanation. In *Proceedings of EMNLP-IJCNLP*, 11–20 (2019). https://doi.org/10.18653/v1/D19-1002
-7. Smith, L. M., Kelleher, N. L. and The Consortium for Top Down Proteomics. Proteoform: a single term describing protein complexity. *Nature Methods* **10**(3), 186–187 (2013). https://doi.org/10.1038/nmeth.2369
-8. Ambroise, C. and McLachlan, G. J. Selection bias in gene extraction on the basis of microarray gene-expression data. *Proceedings of the National Academy of Sciences* **99**(10), 6562–6566 (2002). https://doi.org/10.1073/pnas.102102699
-9. scikit-learn developers. Common pitfalls and recommended practices; roc_auc_score; Tuning the decision threshold for class prediction. *Official documentation* (accessed 18 October 2026). https://scikit-learn.org/stable/common_pitfalls.html
-10. Hydra developers. Output/Working directory. *Hydra v1.3 official documentation* (accessed 18 October 2026). https://hydra.cc/docs/1.3/tutorials/basic/running_your_app/working_directory/
-11. Saito, T. and Rehmsmeier, M. The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets. *PLOS ONE* **10**(3), e0118432 (2015). https://doi.org/10.1371/journal.pone.0118432
+7. Example, N. and Sample, J. *OmniDrop Universal Diagnosis*. n.d.
+8. Smith, L. M., Kelleher, N. L. and The Consortium for Top Down Proteomics. Proteoform: a single term describing protein complexity. *Nature Methods* **10**(3), 186–187 (2013). https://doi.org/10.1038/nmeth.2369
+9. Ambroise, C. and McLachlan, G. J. Selection bias in gene extraction on the basis of microarray gene-expression data. *Proceedings of the National Academy of Sciences* **99**(10), 6562–6566 (2002). https://doi.org/10.1073/pnas.102102699
+10. scikit-learn developers. Common pitfalls and recommended practices; roc_auc_score; Tuning the decision threshold for class prediction. *Official documentation* (accessed 18 October 2026). https://scikit-learn.org/stable/common_pitfalls.html
+11. Hydra developers. Output/Working directory. *Hydra v1.3 official documentation* (accessed 18 October 2026). https://hydra.cc/docs/1.3/tutorials/basic/running_your_app/working_directory/
+12. Saito, T. and Rehmsmeier, M. The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets. *PLOS ONE* **10**(3), e0118432 (2015). https://doi.org/10.1371/journal.pone.0118432
