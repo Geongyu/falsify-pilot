@@ -25,6 +25,13 @@ def test_join_uses_canonical_ids_not_row_order():
     assert row["PROT_01"] == 1.0 and row["RNA_001"] == 9.0
 
 
+def test_missing_modality_is_flagged():
+    specimens, crosswalk, protein, rna = _toy()
+    a = assemble(protein, rna, crosswalk, specimens).set_index("canonical_specimen_id")
+    assert not a.loc["SYN-P0002-A1", "protein_available"]
+    assert a.loc["SYN-P0002-A1", "rna_available"]
+
+
 def test_duplicate_local_id_is_rejected():
     _, crosswalk, _, _ = _toy()
     crosswalk.loc[1, "rna_local_id"] = "RL-9"

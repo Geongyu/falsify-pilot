@@ -24,6 +24,7 @@ import pandas as pd
 from src import schema
 from src.io_utils import sha256_file, write_csv, write_json
 from src.labels import build_labels, observation_mask
+from src.pairing import modality_mask
 
 GENERATOR_VERSION = "1.0"
 SEED = 1729
@@ -287,12 +288,13 @@ def write_cohort(out_dir, seed: int = SEED) -> dict:
     write_csv(tables["rna"], out_dir / "rna.csv")
     write_csv(tables["labels"], out_dir / "labels.csv")
     write_csv(observation_mask(tables["labels"]), out_dir / "observation_mask.csv")
+    write_csv(modality_mask(tables["modality_crosswalk"]), out_dir / "modality_mask.csv")
     write_json(feature_dictionary(), out_dir / "feature_dictionary.json")
     write_json(label_dictionary(), out_dir / "label_dictionary.json")
     write_json(label_provenance(tables["labels"]), out_dir / "label_provenance.json")
 
     outputs = ["subjects.csv", "specimens.csv", "modality_crosswalk.csv", "protein.csv", "rna.csv",
-               "labels.csv", "observation_mask.csv", "feature_dictionary.json",
+               "labels.csv", "observation_mask.csv", "modality_mask.csv", "feature_dictionary.json",
                "label_dictionary.json", "label_provenance.json"]
     manifest = {
         "schema_version": "1.0",

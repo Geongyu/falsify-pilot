@@ -91,14 +91,16 @@
     "rna.csv": "179239ee1f6fd16fddb8633811535f0d3c798739bb040dd0c54bf9d3f89d28ae",
     "labels.csv": "748c4dd1ee85500ffcdf37819d09eb2d63788a9d86346e86fa6ebd3eecbb4281",
     "observation_mask.csv": "6c92171d728ad8114320ff786f863eefb7c0021422c79cbfb02d7edb499f3acf",
+    "modality_mask.csv": "9933e33d8f7f10515294cd6653babeb64318dd9288003dee20bc7448565dbb6e",
     "feature_dictionary.json": "434e73865a362662f1766450f085a41c04313c39693fa7c3050a310f633161b5",
     "label_dictionary.json": "fb0dea6f2d6322cc231cd0938b3323ead2e3d01e4e7ca4e03cfa7f460fa87af2",
     "label_provenance.json": "65d5da0c563b5bee020d528ac0e9201c19f2e4f3bf443ca75553759aa9708a4f"
   },
   "producer": {
     "source_sha256": {
-      "src/generate.py": "3fbeefd95f939898679f5a821cd1ecaedbe0657ab35076bc715ae91dbb9914ef",
+      "src/generate.py": "ba417fb16ed08cc41c66842cf5e6fe695a81d85d6a84f298a0caa9b2c67c9f7b",
       "src/labels.py": "13b3b5deea73b2a7b6aaa56ff164b4530e3e0ca5b0c93a9adc262e9513b425af",
+      "src/pairing.py": "e71cdd77575d7777a15cb0c54950ddd9b613942849f9105799fce768fe74b362",
       "src/schema.py": "bf2a82db24b75ed4e7274ba9864f026a7d120a5a750f70edc5a4026509204458",
       "src/io_utils.py": "e03b19012f254fd973bbd9a80011ca5a15fbf0102b8c3e8be060c38a7b78b68a"
     },

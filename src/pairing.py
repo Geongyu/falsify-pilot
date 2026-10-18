@@ -53,3 +53,18 @@ def assemble(protein: pd.DataFrame, rna: pd.DataFrame, crosswalk: pd.DataFrame,
     out["protein_available"] = out["protein_canonical_specimen_id"].notna()
     out["rna_available"] = out["rna_canonical_specimen_id"].notna()
     return out.sort_values("canonical_specimen_id").reset_index(drop=True)
+
+
+def modality_mask(crosswalk: pd.DataFrame) -> pd.DataFrame:
+    """Per-specimen modality availability (independent of label observation)."""
+    out = pd.DataFrame({
+        "specimen_id": crosswalk["canonical_specimen_id"],
+        "protein_available": crosswalk["protein_local_id"].notna(),
+        "rna_available": crosswalk["rna_local_id"].notna(),
+    })
+    return out.sort_values("specimen_id").reset_index(drop=True)
+
+
+def score_status(protein_available, rna_available):
+    """A specimen can be scored when at least one modality is present; otherwise abstain."""
+    return "scored" if (protein_available or rna_available) else "abstain"
