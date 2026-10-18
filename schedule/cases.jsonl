@@ -13,4 +13,4 @@
 {"case_id": "run_sh3j", "overrides": []}
 {"case_id": "run_xapp", "overrides": []}
 {"case_id": "run_yy4a", "overrides": ["model.kind=linear"]}
-{"case_id": "run_zabx", "overrides": []}
+{"case_id": "run_zabx", "overrides": ["selection.threshold_split=test"]}
