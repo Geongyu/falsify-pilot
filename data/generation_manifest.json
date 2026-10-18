@@ -86,13 +86,15 @@
   "outputs": {
     "subjects.csv": "c2d857ca924f7b19d58b4b962c378b1396c90f273ff66ab7959daef2ba808000",
     "specimens.csv": "9a3c3ce354a975db0f55dccdbf0add02ae38602bd30ffc3517c89eb8f796878c",
-    "protein.csv": "5c200b9c34d5626b13745c76d47d2906c77e756f8b29de747a915cb08aa22c26",
-    "rna.csv": "a5f7f379dc860cd6b96c89379982ecfacbb578f7a3024554f3d9efb7c3799dfe",
-    "labels.csv": "ee2426f1b298006fbb948ae499b63e8dd3b099a8c92d08d95c76de1a70f1c882"
+    "modality_crosswalk.csv": "91d998c9102306b18097f4a20ef582d4c18eeb1a3d650139e2d67e9f4d5c9d40",
+    "protein.csv": "2bbf524fc7d1cecac9fa5f6ab60cd9642a84976309060bee697b88b1f0f9b86b",
+    "rna.csv": "179239ee1f6fd16fddb8633811535f0d3c798739bb040dd0c54bf9d3f89d28ae",
+    "labels.csv": "ee2426f1b298006fbb948ae499b63e8dd3b099a8c92d08d95c76de1a70f1c882",
+    "feature_dictionary.json": "434e73865a362662f1766450f085a41c04313c39693fa7c3050a310f633161b5"
   },
   "producer": {
     "source_sha256": {
-      "src/generate.py": "0e789b172fdd047b84943315e74a8ae1a54dbe5dfe19d11a8b906adf09dabd74",
+      "src/generate.py": "f4e606fc22c9375e5873d5ba8a28a37c754813427fc88fb92933206c6d9f9526",
       "src/schema.py": "bf2a82db24b75ed4e7274ba9864f026a7d120a5a750f70edc5a4026509204458",
       "src/io_utils.py": "e03b19012f254fd973bbd9a80011ca5a15fbf0102b8c3e8be060c38a7b78b68a"
     },

@@ -9,7 +9,7 @@ that state plus a site batch offset and aliquot-level technical noise. Six
 synthetic outcomes depend on the latent state and the site; event and follow-up
 days are recorded per (subject, task) in labels.csv. One RNA-file
 column, ``followup_peak_synthetic``, is a day-30 follow-up measurement that
-tracks the outcomes.
+tracks the outcomes; the feature dictionary marks it as post-index.
 
 Usage: ``python -m src.generate --out data``
 """
@@ -172,19 +172,67 @@ def generate_cohort(seed: int = SEED) -> dict:
     protein[rng.random(protein.shape) < p["cell_missing_prob"]] = np.nan
     rna[rng.random(rna.shape) < p["cell_missing_prob"]] = np.nan
 
+    # local identifiers and independent row orders per modality file
+    rng = stream("local_ids", seed)
+    p_codes = rng.choice(np.arange(10000, 100000), size=n_spec, replace=False)
+    r_codes = rng.choice(np.arange(10000, 100000), size=n_spec, replace=False)
+    protein_local = np.array([f"PL-{c}" for c in p_codes])
+    rna_local = np.array([f"RL-{c}" for c in r_codes])
+    crosswalk = pd.DataFrame({
+        "canonical_specimen_id": specimens["specimen_id"],
+        "protein_local_id": np.where(protein_ok, protein_local, None),
+        "rna_local_id": np.where(rna_ok, rna_local, None),
+    })
+
     protein_df = pd.DataFrame(np.round(protein, 6), columns=PROTEIN_FEATURES)
-    protein_df.insert(0, "specimen_id", specimens["specimen_id"])
-    protein_df = protein_df[protein_ok].reset_index(drop=True)
+    protein_df.insert(0, "protein_local_id", protein_local)
+    protein_df = protein_df[protein_ok].iloc[rng.permutation(int(protein_ok.sum()))].reset_index(drop=True)
     rna_df = pd.DataFrame(np.round(rna, 6), columns=RNA_FEATURES)
-    rna_df.insert(0, "specimen_id", specimens["specimen_id"])
-    rna_df = rna_df[rna_ok].reset_index(drop=True)
+    rna_df.insert(0, "rna_local_id", rna_local)
+    rna_df = rna_df[rna_ok].iloc[rng.permutation(int(rna_ok.sum()))].reset_index(drop=True)
 
     return {
         "subjects": subjects,
         "specimens": specimens,
         "protein": protein_df,
         "rna": rna_df,
+        "modality_crosswalk": crosswalk,
         "labels": labels,
+    }
+
+
+def feature_dictionary() -> dict:
+    features = []
+    for name in PROTEIN_FEATURES:
+        features.append({
+            "name": name, "modality": "protein", "available_day": 0, "is_post_index": False,
+            "role": "baseline_synthetic",
+            "description": "Synthetic proteoform-level abundance proxy measured at the index visit "
+                           "(simulated value; no assay was performed).",
+        })
+    for name in RNA_BASELINE_FEATURES:
+        features.append({
+            "name": name, "modality": "rna", "available_day": 0, "is_post_index": False,
+            "role": "baseline_synthetic",
+            "description": "Synthetic transcript abundance proxy measured at the index visit "
+                           "(simulated value; no assay was performed).",
+        })
+    pi = PARAMS["post_index_feature"]
+    features.append({
+        "name": pi["name"], "modality": "rna", "available_day": pi["available_day"], "is_post_index": True,
+        "role": "post_index_label_proxy",
+        "description": "Synthetic follow-up measurement taken on day 30 after the index visit; it tracks "
+                       "events inside the 180-day window and is not available at prediction time (day 0).",
+    })
+    return {
+        "schema_version": "1.0",
+        "prediction_time_day": 0,
+        "terminology": {
+            "proteoform": "Distinct molecular form of a protein product of a single gene "
+                          "(Smith & Kelleher, Nature Methods 10:186-187, 2013, doi:10.1038/nmeth.2369). "
+                          "Used here only as the name of a simulated feature family."
+        },
+        "features": features,
     }
 
 
@@ -193,11 +241,14 @@ def write_cohort(out_dir, seed: int = SEED) -> dict:
     tables = generate_cohort(seed)
     write_csv(tables["subjects"], out_dir / "subjects.csv")
     write_csv(tables["specimens"], out_dir / "specimens.csv")
+    write_csv(tables["modality_crosswalk"], out_dir / "modality_crosswalk.csv")
     write_csv(tables["protein"], out_dir / "protein.csv")
     write_csv(tables["rna"], out_dir / "rna.csv")
     write_csv(tables["labels"], out_dir / "labels.csv")
+    write_json(feature_dictionary(), out_dir / "feature_dictionary.json")
 
-    outputs = ["subjects.csv", "specimens.csv", "protein.csv", "rna.csv", "labels.csv"]
+    outputs = ["subjects.csv", "specimens.csv", "modality_crosswalk.csv", "protein.csv", "rna.csv",
+               "labels.csv", "feature_dictionary.json"]
     manifest = {
         "schema_version": "1.0",
         "generator": "src/generate.py",
