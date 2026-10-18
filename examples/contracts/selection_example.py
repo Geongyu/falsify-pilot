@@ -18,10 +18,11 @@ HERE = Path(__file__).parent
 
 def build() -> dict:
     ledger = pd.read_csv(HERE / "selection_ledger.csv")
-    best = select_candidate(ledger, key="val_loss")
+    best = select_candidate(ledger, key="test_auroc")
     return {
-        "selection_key": "val_loss",
-        "selected": {"seed": int(best["seed"]), "epoch": int(best["epoch"]), "val_loss": float(best["val_loss"])},
+        "selection_key": "test_auroc",
+        "selected": {"seed": int(best["seed"]), "epoch": int(best["epoch"]), "val_loss": float(best["val_loss"]),
+                     "test_auroc": float(best["test_auroc"])},
         "n_candidates": int(len(ledger)),
         "ledger_columns": list(ledger.columns),
     }

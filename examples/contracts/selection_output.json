@@ -1,14 +1,16 @@
 {
-  "selection_key": "val_loss",
+  "selection_key": "test_auroc",
   "selected": {
-    "seed": 11,
-    "epoch": 3,
-    "val_loss": 0.561
+    "seed": 23,
+    "epoch": 4,
+    "val_loss": 0.583,
+    "test_auroc": 0.772
   },
   "n_candidates": 8,
   "ledger_columns": [
     "seed",
     "epoch",
-    "val_loss"
+    "val_loss",
+    "test_auroc"
   ]
 }

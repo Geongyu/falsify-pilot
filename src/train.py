@@ -86,9 +86,9 @@ def train_model(model, train_data, val_data, max_epochs: int, learning_rate: flo
     return ledger, states
 
 
-def select_candidate(ledger: pd.DataFrame, key: str = "val_loss") -> pd.Series:
-    """Pick the candidate (epoch, and seed if present) with the lowest validation loss."""
-    order = ledger.sort_values([key] + [c for c in ("seed", "epoch") if c in ledger.columns], kind="mergesort")
+def select_candidate(ledger: pd.DataFrame, key: str = "test_auroc") -> pd.Series:
+    """Pick the candidate (epoch, and seed if present) with the best summary score."""
+    order = ledger.sort_values(key, ascending=False, kind="mergesort")
     return ledger.loc[order.index[0]]
 
 
