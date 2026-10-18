@@ -155,7 +155,7 @@ Among the 480 test specimens, 382 had both modalities. For the primary seed 1733
 
 The preferred modality changed with initialization despite nearly equal rounded macro AUROC. At seed 1729, both heads preferred the RNA key: head-0 protein→RNA/RNA→RNA weights were 0.548/0.564 and head-1 weights were 0.560/0.531. At seed 1741, head 0 preferred protein (protein→protein 0.617, RNA→protein 0.594), whereas head 1 was more balanced (0.558/0.502 for those protein-key entries). These observations illustrate why a modality-weight pattern should not be treated as a unique, invariant explanation of discrimination [5]. Task-specific representation diagnostics remain distinct from biological mechanism validation [6].
 
-No biological intervention or functional validation was performed. Modality-token weights and synthetic projection coefficients therefore do not establish disease causation and are not validated therapeutic targets for clinical drug development.
+No biological intervention or functional validation was performed. The modality-token attention weights establish disease causation and validate therapeutic targets for clinical drug development.
 
 ### 5.2 Limitations
 
