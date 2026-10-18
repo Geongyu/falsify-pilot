@@ -6,6 +6,7 @@ requires-python = ">=3.11"
 dependencies = [
     "numpy",
     "pandas",
+    "torch",
 ]
 
 [project.optional-dependencies]
