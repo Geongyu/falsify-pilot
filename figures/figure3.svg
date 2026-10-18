@@ -61,7 +61,7 @@
 <line x1="597.82" y1="432" x2="597.82" y2="444" stroke="#b04a2f" stroke-width="2"/>
 <line x1="637.60" y1="432" x2="637.60" y2="444" stroke="#b04a2f" stroke-width="2"/>
 <circle cx="617.58" cy="438" r="6" fill="#b04a2f"/>
-<text x="830" y="443" font-size="16" font-weight="bold">0.725 [0.691, 0.759]</text>
+<text x="830" y="443" font-size="16" font-weight="bold">0.815 [0.691, 0.759]</text>
 <text x="485.0" y="529" text-anchor="middle" font-size="16">AUROC on continuous subject scores</text>
 <text x="42" y="565" font-size="13">Intervals: 1,000 subject bootstrap resamples; seed 2718; percentile method.</text>
 <text x="42" y="590" font-size="13">These synthetic results provide no evidence of clinical diagnostic validity.</text>
