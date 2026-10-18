@@ -22,6 +22,11 @@
       "bytes": 2952
     },
     {
+      "path": "REPRODUCE.md",
+      "sha256": "03d47e4ce37d79d9effdb47844d21bffbc42c3a1f39fb6efe518d05c3d1ba7cf",
+      "bytes": 3012
+    },
+    {
       "path": "SUBMISSION.md",
       "sha256": "e4d6005d3c0ee368c6c2a7617381005943a331a853f495735151641265abbb2d",
       "bytes": 1862
@@ -188,8 +193,8 @@
     },
     {
       "path": "evidence/artifact_manifest.json",
-      "sha256": "136f1f17b8ee080fd5ce3787b5177033d56097f0db0e040d171c3ebec84a7c5b",
-      "bytes": 72691
+      "sha256": "03fff8a5887f8f7c7ee9730753cd5e6b0cadbf2be2e73f85825a4f5c5f003747",
+      "bytes": 72838
     },
     {
       "path": "evidence/reference_registry.json",
