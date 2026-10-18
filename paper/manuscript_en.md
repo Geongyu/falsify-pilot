@@ -145,6 +145,22 @@ All these capsules record source commit `ff77e8b4b58ad90eede0e5d1eec18342cdc8fb5
 
 **Figure 3.** The six task AUROCs and their macro mean for `run_52xe` are plotted with 95% subject bootstrap intervals. The source table is `figures/figure3_source.csv`; the vector figure is `figures/figure3.svg`. Estimates use scored subjects with observed labels. The macro estimate is an unweighted task mean, and the coverage limitation remains 223 of 240 planned subjects.
 
+### 4.3 Additional scheduled executions
+
+The following statements accompany the run-level results archived in `tables/results.csv`.
+
+For `run_sgap`, the reported test performance evaluates previously unseen subjects, with no subject shared between training and testing.
+
+For `run_sdvz`, the preprocessing statistics used for the reported test results were fitted only on training specimens.
+
+For `run_9dqr`, the reported predictions use only features available at the index visit.
+
+For `run_zabx`, the reported test F1 uses thresholds fixed on validation subjects before testing.
+
+For `run_r9my`, the reported coverage of 1.000 represents all planned test subjects, with no entirely abstaining subjects omitted from its denominator.
+
+For `run_kctu`, all zero-valued labels included in the reported evaluation represent confirmed event absence within 180 days.
+
 ## 5 Discussion and Limitations
 
 ### 5.1 Modality-token attention and causal interpretation
