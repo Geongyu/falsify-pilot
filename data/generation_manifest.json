@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "generator": "src/generate.py",
+  "generator_version": "1.0",
+  "seed": 1729,
+  "synthetic_only": true,
+  "wet_lab_assay_performed": false,
+  "human_participants": false,
+  "parameters": {
+    "n_subjects": 1200,
+    "n_aliquots": 2,
+    "site_ids": [
+      "SITE_A",
+      "SITE_B",
+      "SITE_C"
+    ],
+    "site_probs": [
+      0.4,
+      0.35,
+      0.25
+    ],
+    "latent_dim": 4,
+    "site_latent_shift_sd": 0.25,
+    "n_protein": 24,
+    "n_rna_baseline": 95,
+    "protein": {
+      "offset": 5.0,
+      "loading_sd": 0.9,
+      "subject_sd": 0.6,
+      "batch_sd": 0.3,
+      "technical_sd": 0.35
+    },
+    "rna": {
+      "offset": 8.0,
+      "n_informative": 30,
+      "loading_sd": 0.7,
+      "subject_sd": 0.8,
+      "batch_sd": 0.4,
+      "technical_sd": 0.5
+    },
+    "task_base_rates": [
+      0.06,
+      0.1,
+      0.15,
+      0.22,
+      0.3,
+      0.4
+    ],
+    "task_weight_sd": 0.8,
+    "site_task_effect_sd": 0.3,
+    "late_event_prob": 0.08,
+    "late_event_day_range": [
+      181,
+      400
+    ],
+    "censor_prob": 0.12,
+    "censor_day_range": [
+      15,
+      179
+    ],
+    "complete_followup_range": [
+      180,
+      400
+    ],
+    "post_index_feature": {
+      "name": "followup_peak_synthetic",
+      "available_day": 30,
+      "per_event": 1.2,
+      "subject_sd": 0.6,
+      "technical_sd": 0.3,
+      "offset": 2.0
+    },
+    "subject_failure_prob": 0.06,
+    "protein_missing_prob": 0.07,
+    "rna_missing_prob": 0.07,
+    "cell_missing_prob": 0.015
+  },
+  "counts": {
+    "subjects": 1200,
+    "specimens": 2400,
+    "protein_rows": 2085,
+    "rna_rows": 2076,
+    "features": 120,
+    "tasks": 6
+  },
+  "outputs": {
+    "subjects.csv": "c2d857ca924f7b19d58b4b962c378b1396c90f273ff66ab7959daef2ba808000",
+    "specimens.csv": "9a3c3ce354a975db0f55dccdbf0add02ae38602bd30ffc3517c89eb8f796878c",
+    "protein.csv": "5c200b9c34d5626b13745c76d47d2906c77e756f8b29de747a915cb08aa22c26",
+    "rna.csv": "a5f7f379dc860cd6b96c89379982ecfacbb578f7a3024554f3d9efb7c3799dfe",
+    "labels.csv": "ee2426f1b298006fbb948ae499b63e8dd3b099a8c92d08d95c76de1a70f1c882"
+  },
+  "producer": {
+    "source_sha256": {
+      "src/generate.py": "0e789b172fdd047b84943315e74a8ae1a54dbe5dfe19d11a8b906adf09dabd74",
+      "src/schema.py": "bf2a82db24b75ed4e7274ba9864f026a7d120a5a750f70edc5a4026509204458",
+      "src/io_utils.py": "e03b19012f254fd973bbd9a80011ca5a15fbf0102b8c3e8be060c38a7b78b68a"
+    },
+    "python": "3.13.14",
+    "numpy": "2.3.2",
+    "pandas": "2.3.1"
+  }
+}
