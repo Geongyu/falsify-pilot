@@ -50,3 +50,12 @@ python -m tools.verify_contracts --run <case_id>   # or --all-runs
 archive and index, the Hydra configuration (`.hydra/`), fit membership and preprocessing
 statistics, the checkpoint ledger and selected checkpoint, selection details, predictions,
 the evaluation flow, metrics, an event log and a run manifest with output hashes.
+
+## Archived execution source
+
+To reproduce archived execution `run_m72s` from the same source, use a separate clean checkout at source_commit `f5ce7fe2e8399fcb2bc6b157e970b8fe2b70bf48`. Install the locked environment there and run:
+
+```bash
+git checkout --detach f5ce7fe2e8399fcb2bc6b157e970b8fe2b70bf48
+python -m tools.run_case --case run_m72s
+```
